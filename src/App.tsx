@@ -16,7 +16,7 @@ import { useDebounce } from "./hooks/useDebounce";
 
 type StatusFilter = ItemStatus | "all";
 
-const App = (): JSX.Element => {
+const App = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [meta, setMeta] = useState<PaginatedMeta | null>(null);
   const [search, setSearch] = useState("");
@@ -115,9 +115,9 @@ const App = (): JSX.Element => {
               edits.
             </p>
           </div>
-          <button type="button" className="primary" onClick={handleCreateClick}>
+          {/* <button type="button" className="primary" onClick={handleCreateClick}>
             + Add Item
-          </button>
+          </button> */}
         </header>
         <SearchBar
           search={search}

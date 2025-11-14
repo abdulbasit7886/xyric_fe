@@ -1,4 +1,14 @@
 import type { FC } from "react";
+import {
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import type { ItemStatus } from "../types/item";
 
 interface SearchBarProps {
@@ -30,47 +40,79 @@ export const SearchBar: FC<SearchBarProps> = ({
   onLimitChange,
   onCreate,
   isLoading,
-}) => (
-  <section className="toolbar">
-    <div className="toolbar__filters">
-      <input
-        type="search"
-        placeholder="Search title, description, tags..."
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
-      />
-      <select
-        value={status}
-        onChange={(event) =>
-          onStatusChange(event.target.value as ItemStatus | "all")
-        }
-      >
-        {statusOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <select
-        value={limit}
-        onChange={(event) => onLimitChange(Number(event.target.value))}
-      >
-        {pageSizes.map((size) => (
-          <option key={size} value={size}>
-            Show {size}
-          </option>
-        ))}
-      </select>
-    </div>
-    <button
-      className="primary"
-      type="button"
-      onClick={onCreate}
-      disabled={isLoading}
+}) => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: 3,
+        borderRadius: 3,
+        border: "1px solid",
+        borderColor: "divider",
+      }}
     >
-      + Add Item
-    </button>
-  </section>
-);
+      <Stack
+        direction={isSmallScreen ? "column" : "row"}
+        spacing={2}
+        alignItems={isSmallScreen ? "stretch" : "center"}
+      >
+        <Stack
+          direction={isSmallScreen ? "column" : "row"}
+          spacing={2}
+          flex={1}
+        >
+          <TextField
+            fullWidth
+            type="search"
+            label="Search"
+            placeholder="Search title, description, tags..."
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+          />
+          <TextField
+            select
+            label="Status"
+            fullWidth
+            value={status}
+            onChange={(event) =>
+              onStatusChange(event.target.value as ItemStatus | "all")
+            }
+          >
+            {statusOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            label="Items per page"
+            fullWidth
+            value={limit}
+            onChange={(event) => onLimitChange(Number(event.target.value))}
+          >
+            {pageSizes.map((size) => (
+              <MenuItem key={size} value={size}>
+                Show {size}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Stack>
+        <Button
+          variant="contained"
+          startIcon={<AddRoundedIcon />}
+          onClick={onCreate}
+          disabled={isLoading}
+          size="large"
+        >
+          Add Item
+        </Button>
+      </Stack>
+    </Paper>
+  );
+};
 
 export default SearchBar;

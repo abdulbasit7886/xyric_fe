@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
-import "./App.css";
+import { Box, Container, Stack, Typography } from "@mui/material";
 import { createItem, deleteItem, fetchItems, updateItem } from "./api/items";
 import type {
   Item,
@@ -107,45 +107,59 @@ const App = () => {
   return (
     <>
       <Toaster position="top-right" />
-      <main className="page">
-        <header className="page__header">
-          <div>
-            <p>
-              Track inventory items with live search, pagination, and quick
-              edits.
-            </p>
-          </div>
-          {/* <button type="button" className="primary" onClick={handleCreateClick}>
-            + Add Item
-          </button> */}
-        </header>
-        <SearchBar
-          search={search}
-          onSearchChange={(value) => {
-            setSearch(value);
-            setPage(1);
-          }}
-          status={status}
-          onStatusChange={(value) => {
-            setStatus(value);
-            setPage(1);
-          }}
-          limit={limit}
-          onLimitChange={(value) => {
-            setLimit(value);
-            setPage(1);
-          }}
-          onCreate={handleCreateClick}
-          isLoading={loading}
-        />
-        <ItemTable
-          items={items}
-          isLoading={loading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-        <Pagination meta={meta} onPageChange={setPage} isLoading={loading} />
-      </main>
+      <Box
+        component="main"
+        sx={{ bgcolor: "background.default", minHeight: "100vh", py: 4 }}
+      >
+        <Container maxWidth="lg">
+          <Stack spacing={3}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              justifyContent="space-between"
+              alignItems={{ xs: "flex-start", sm: "center" }}
+            >
+              <Typography variant="h4" fontWeight={600}>
+                Inventory dashboard
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Track inventory items with live search, pagination, and quick
+                edits.
+              </Typography>
+            </Stack>
+            <SearchBar
+              search={search}
+              onSearchChange={(value) => {
+                setSearch(value);
+                setPage(1);
+              }}
+              status={status}
+              onStatusChange={(value) => {
+                setStatus(value);
+                setPage(1);
+              }}
+              limit={limit}
+              onLimitChange={(value) => {
+                setLimit(value);
+                setPage(1);
+              }}
+              onCreate={handleCreateClick}
+              isLoading={loading}
+            />
+            <ItemTable
+              items={items}
+              isLoading={loading}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+            <Pagination
+              meta={meta}
+              onPageChange={setPage}
+              isLoading={loading}
+            />
+          </Stack>
+        </Container>
+      </Box>
       <ItemFormModal
         open={modalOpen}
         initialItem={activeItem}
@@ -159,5 +173,4 @@ const App = () => {
     </>
   );
 };
-
 export default App;

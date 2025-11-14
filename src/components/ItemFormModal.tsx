@@ -3,6 +3,20 @@ import type { FC } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import type { Item, ItemPayload, ItemStatus } from "../types/item";
 
 const formSchema = z.object({
@@ -43,10 +57,8 @@ const ItemFormModal: FC<ItemFormModalProps> = ({
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<ItemFormValues, undefined, ItemFormValues>({
-    resolver: zodResolver<ItemFormValues, undefined, ItemFormValues>(
-      formSchema
-    ),
+  } = useForm<ItemFormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -61,13 +73,13 @@ const ItemFormModal: FC<ItemFormModalProps> = ({
   useEffect(() => {
     if (initialItem) {
       reset({
-        title: initialItem.title,
+        title: initialItem.title ?? "",
         description: initialItem.description ?? "",
         category: initialItem.category ?? "",
-        price: initialItem.price,
-        quantity: initialItem.quantity,
+        price: initialItem.price ?? 0,
+        quantity: initialItem.quantity ?? 0,
         tags: toTagString(initialItem.tags),
-        status: initialItem.status,
+        status: initialItem.status ?? "active",
       });
     } else {
       reset({
@@ -99,95 +111,141 @@ const ItemFormModal: FC<ItemFormModalProps> = ({
     };
 
     await onSubmit(payload);
+
+    if (!initialItem) {
+      reset({
+        title: "",
+        description: "",
+        category: "",
+        price: 0,
+        quantity: 0,
+        tags: "",
+        status: "active",
+      });
+    }
   });
 
-  if (!open) return null;
+  const formId = "item-form";
 
   return (
-    <div className="modal-overlay" role="dialog" aria-modal="true">
-      <div className="modal">
-        <header className="modal__header">
-          <h2>{initialItem ? "Edit item" : "Create item"}</h2>
-          <button type="button" aria-label="Close" onClick={onClose}>
-            ×
-          </button>
-        </header>
-        <form className="modal__content" onSubmit={submitHandler}>
-          <div className="form-grid">
-            <label>
-              <span>Title *</span>
-              <input type="text" {...register("title")} />
-              {errors.title && (
-                <small className="error">{errors.title.message}</small>
-              )}
-            </label>
-            <label>
-              <span>Category</span>
-              <input type="text" {...register("category")} />
-              {errors.category && (
-                <small className="error">{errors.category.message}</small>
-              )}
-            </label>
-            <label>
-              <span>Price *</span>
-              <input
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      aria-labelledby="item-form-title"
+    >
+      <DialogTitle sx={{ pb: 1 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Typography id="item-form-title" variant="h6">
+            {initialItem ? "Edit item" : "Create item"}
+          </Typography>
+          <IconButton onClick={onClose} aria-label="Close">
+            <CloseRoundedIcon />
+          </IconButton>
+        </Stack>
+      </DialogTitle>
+      <Box component="form" id={formId} onSubmit={submitHandler} noValidate>
+        <DialogContent dividers>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)" } }}>
+              <TextField
+                label="Title"
+                fullWidth
+                required
+                {...register("title")}
+                error={Boolean(errors.title)}
+                helperText={errors.title?.message}
+              />
+            </Box>
+            <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)" } }}>
+              <TextField
+                label="Category"
+                fullWidth
+                {...register("category")}
+                error={Boolean(errors.category)}
+                helperText={errors.category?.message}
+              />
+            </Box>
+            <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)" } }}>
+              <TextField
+                label="Price"
                 type="number"
-                step="0.01"
+                inputProps={{ step: 0.01 }}
+                fullWidth
+                required
                 {...register("price", { valueAsNumber: true })}
+                error={Boolean(errors.price)}
+                helperText={errors.price?.message}
               />
-              {errors.price && (
-                <small className="error">{errors.price.message}</small>
-              )}
-            </label>
-            <label>
-              <span>Quantity *</span>
-              <input
+            </Box>
+            <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)" } }}>
+              <TextField
+                label="Quantity"
                 type="number"
+                fullWidth
+                required
                 {...register("quantity", { valueAsNumber: true })}
+                error={Boolean(errors.quantity)}
+                helperText={errors.quantity?.message}
               />
-              {errors.quantity && (
-                <small className="error">{errors.quantity.message}</small>
-              )}
-            </label>
-            <label>
-              <span>Status *</span>
-              <select {...register("status")}>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="archived">Archived</option>
-              </select>
-            </label>
-            <label className="full-row">
-              <span>Description</span>
-              <textarea rows={3} {...register("description")} />
-              {errors.description && (
-                <small className="error">{errors.description.message}</small>
-              )}
-            </label>
-            <label className="full-row">
-              <span>Tags (comma separated)</span>
-              <input type="text" {...register("tags")} />
-              {errors.tags && (
-                <small className="error">{errors.tags.message}</small>
-              )}
-            </label>
-          </div>
-          <footer className="modal__footer">
-            <button
-              type="button"
-              className="ghost"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="primary" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : initialItem ? "Update" : "Create"}
-            </button>
-          </footer>
-        </form>
-      </div>
-    </div>
+            </Box>
+            <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 16px)" } }}>
+              <TextField
+                select
+                label="Status"
+                fullWidth
+                required
+                defaultValue={initialItem ? initialItem.status : "active"}
+                {...register("status")}
+              >
+                <MenuItem value="active">Active</MenuItem>
+                <MenuItem value="inactive">Inactive</MenuItem>
+                <MenuItem value="archived">Archived</MenuItem>
+              </TextField>
+            </Box>
+            <Box sx={{ flex: "1 1 100%" }}>
+              <TextField
+                label="Description"
+                multiline
+                rows={3}
+                fullWidth
+                {...register("description")}
+                error={Boolean(errors.description)}
+                helperText={errors.description?.message}
+              />
+            </Box>
+            <Box sx={{ flex: "1 1 100%" }}>
+              <TextField
+                label="Tags (comma separated)"
+                fullWidth
+                placeholder="e.g. featured, wholesale"
+                {...register("tags")}
+                error={Boolean(errors.tags)}
+                helperText={errors.tags?.message}
+              />
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            form={formId}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Saving..." : initialItem ? "Update" : "Create"}
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
   );
 };
 
